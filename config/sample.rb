@@ -1,6 +1,9 @@
-# if the name below is an existing path then `source` is set this value
+# name of the sync
+# if it is an existing path then `source` is set this value
 sync '4tb' do
+  enabled = false
 
+  # fork to user below, usually associated with private keys 
   user = :root
 
   delay = 5
@@ -18,6 +21,5 @@ sync '4tb' do
   ]
 
   log.info 'starting'
-
 end
 

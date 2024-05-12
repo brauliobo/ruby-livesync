@@ -33,8 +33,7 @@ module LiveSync
       @syncs.each do |user, syncs|
         User.wrap user do
           syncs.each do |s|
-            s.run
-            s.guard
+            s.guard if s.start
           rescue => e
             msg  = e.message
             msg += "\n#{e.backtrace.join "\n"}" if Log.debug?

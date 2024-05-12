@@ -30,7 +30,6 @@ module LiveSync
           Log.error "ssh/#{userhost}: #{stderr.read}"
         end
       end
-      sleep 1 while !available?
     end
 
     def available?

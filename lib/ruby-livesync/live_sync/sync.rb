@@ -23,6 +23,8 @@ module LiveSync
       @log = Log.new ctx
     end
 
+    dsl :enabled, default: true
+
     dsl :user, default: :root
     dsl :source do |source|
       raise "#{ctx}: source not found" unless File.exist? source
@@ -33,7 +35,6 @@ module LiveSync
     dsl :target do |target|
       @userhost, @target_path = target.split(':')
       raise "#{ctx}: missing target path" unless @target_path
-      @user, @host = if @userhost.index '@' then @userhost.split('@') else [@user, @userhost] end
     end
 
     dsl :delay, default: 5, type: Integer
@@ -42,9 +43,12 @@ module LiveSync
 
     dsl :excludes, default: []
 
-    def run
+    def start
+      return log.warning('skipping disable sync') && false unless enabled
       raise "#{ctx}: missing target" unless @target
-      @ssh   = Ssh.connect @userhost
+      @ssh = Ssh.connect @userhost
+      sleep 1 and log.warning 'waiting for ssh' while !@ssh.available?
+      true
     end
 
     def guard
@@ -72,7 +76,7 @@ module LiveSync
       return if @rsync.running?
       @watcher.process # calls #track
       return if @to_sync.blank?
-      @rsync.from_list @to_sync
+      @rsync.partial @to_sync
       @to_sync.clear
     ensure
       schedule

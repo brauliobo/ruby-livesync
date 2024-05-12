@@ -19,7 +19,7 @@ module LiveSync
       run :initial, *args
     end
 
-    def from_list paths
+    def partial paths
       args  = ['--files-from=-']
       args << '--delete-missing-args' if sync.delete.in? [true, :watched]
       run :partial, *args do |stdin, stdout, stderr|
