@@ -35,7 +35,7 @@ module LiveSync
       @user, @host = if @userhost.index '@' then @userhost.split('@') else [@user, @userhost] end
     end
 
-    dsl :delay, default: 1, type: Integer
+    dsl :delay, default: 5, type: Integer
 
     def run
       raise "#{ctx}: missing target" unless @target
@@ -51,7 +51,7 @@ module LiveSync
 
         @watcher.dir_rwatch source, *%i[create modify], &method(:track)
         @rsync.initial
-        @scheduler.every "#{delay}s", &method(:check)
+        schedule
         sleep 1.day while true
       end
     end
@@ -60,11 +60,18 @@ module LiveSync
       @to_sync << Pathname.new(event.absolute_name).relative_path_from(@pathname).to_s
     end
 
+    def schedule
+      @scheduler.in "#{delay}s", &method(:check)
+    end
+
     def check
       return if @rsync.running?
       @watcher.process # calls #track
+      return if @to_sync.blank?
       @rsync.from_list @to_sync
       @to_sync.clear
+    ensure
+      schedule
     end
 
     protected
