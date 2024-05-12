@@ -1,0 +1,45 @@
+module LiveSync
+  class Rsync
+
+    attr_reader :sync, :opts
+
+    def initialize sync
+      @sync = sync
+      @opts = '-ax --partial'
+    end
+
+    def running?
+      @wait_thr
+    end
+
+    def initial
+      run :initial
+    end
+
+    def from_list paths
+      run :partial, '--files-from=-' do |stdin, stdout, stderr|
+        stdin.write paths.join "\n"
+        stdin.close
+      end
+    end
+
+    protected
+
+    def run type, args=nil
+      cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{sync.target} #{args}"
+      sync.log.info "#{type}: starting with cmd: #{cmd}"
+      stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
+      yield stdin, stdout, stderr if block_given?
+      Thread.new do
+        Process.wait @wait_thr.pid rescue Errno::ECHILD; nil
+        @wait_thr = nil
+        sync.log.info "#{type}: finished"
+      end
+    end
+
+    def rsh
+      "ssh -o ControlPath=#{sync.ssh.cpath}"
+    end
+
+  end
+end

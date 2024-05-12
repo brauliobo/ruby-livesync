@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'pry'
+require 'irb'
+
+require_relative '../lib/ruby-livesync'
+
+Pry.start rescue IRB.start
+
