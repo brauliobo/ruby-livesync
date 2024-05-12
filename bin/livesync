@@ -2,7 +2,7 @@
 
 require 'bundler/setup'
 
-require_relative '../lib/ruby-livesync'
+require 'ruby-livesync'
 
 config = ARGV[0]
 LiveSync::Daemon.start config
