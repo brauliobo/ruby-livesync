@@ -14,7 +14,7 @@ module LiveSync
     end
 
     def start
-      Process.setpgrp
+      Process.setpgrp rescue nil # not allowed in systemd
       Process.setproctitle 'livesync'
       instance_eval File.read(config), config
       run

@@ -35,6 +35,7 @@ module LiveSync
     dsl :target do |target|
       @userhost, @target_path = target.split(':')
       raise "#{ctx}: missing target path" unless @target_path
+      source File.join(@source, '') if File.basename(@source) == File.basename(@target_path)
     end
 
     dsl :delay, default: 5, type: Integer
@@ -44,7 +45,7 @@ module LiveSync
     dsl :excludes, default: []
 
     def start
-      return log.warning('skipping disable sync') && false unless enabled
+      return log.warning('skipping disabled sync') && false unless enabled
       raise "#{ctx}: missing target" unless @target
       @ssh = Ssh.connect @userhost
       sleep 1 and log.warning 'waiting for ssh' while !@ssh.available?

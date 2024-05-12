@@ -13,7 +13,7 @@ module LiveSync
       def self.dsl attr, default: nil, enum: nil, type: nil, &block
         self.attrs << attr
         define_method attr do |sv=nil|
-          v = instance_variable_get("@#{attr}") and return(if v.nil? then default else v end) if sv.nil?
+          (v = instance_variable_get("@#{attr}"); return(if v.nil? then default else v end)) if sv.nil?
 
           raise "#{ctx}/#{attr}: incorrect type" if type and !sv.is_a? type
           raise "#{ctx}/#{attr}: value not one of following #{enum}" if enum and !sv.in? enum

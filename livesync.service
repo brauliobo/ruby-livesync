@@ -1,0 +1,13 @@
+[Unit]
+Description=Livesync Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=Simple
+ExecStart=/usr/bin/livesync /etc/livesync/config.rb
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

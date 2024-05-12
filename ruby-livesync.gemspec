@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/brauliobo/ruby-livesync'
   spec.license       = 'GPLv3'
 
-  spec.files         = `git ls-files lib`.split + ['bin/livesync']
+  spec.files         = `git ls-files lib`.split + ['bin/livesync'] + Dir['config/*'] + ['livesync.service']
   spec.bindir        = 'bin'
   spec.executables   = 'livesync'
   spec.require_paths = ['lib']
