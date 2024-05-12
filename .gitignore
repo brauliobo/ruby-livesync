@@ -1,8 +1,2 @@
 *.gem
 
-*.zst
-*.tar.gz
-deps/*/pkg
-pkg
-src
-
