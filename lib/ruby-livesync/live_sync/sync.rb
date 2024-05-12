@@ -38,6 +38,8 @@ module LiveSync
 
     dsl :delay, default: 5, type: Integer
 
+    dsl :delete, default: false, enum: [true,false] + %i[initial watched]
+
     dsl :excludes, default: []
 
     def run
@@ -48,10 +50,10 @@ module LiveSync
     def guard
       fork do
         Process.setproctitle "livesync: sync #{ctx}"
-        @watcher   = Watcher.new
+        @watcher   = Watcher.new self
         @scheduler = Rufus::Scheduler.new
 
-        @watcher.dir_rwatch source, *%i[create modify], excludes: excludes, &method(:track)
+        @watcher.dir_rwatch source, &method(:track)
         @rsync.initial
         schedule
         sleep 1.day while true

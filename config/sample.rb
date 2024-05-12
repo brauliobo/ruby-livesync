@@ -10,6 +10,9 @@ sync '4tb' do
 
   rsync.opts = '-ax --partial' # default
 
+  # possible values are: true, false, :initial, :watched
+  delete = true
+
   excludes = [
     '.snapshots',
   ]

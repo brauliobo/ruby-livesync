@@ -14,11 +14,15 @@ module LiveSync
     end
 
     def initial
-      run :initial
+      args  = []
+      args << '--delete' if sync.delete.in? [true, :initial]
+      run :initial, *args
     end
 
     def from_list paths
-      run :partial, '--files-from=-' do |stdin, stdout, stderr|
+      args  = ['--files-from=-']
+      args << '--delete-missing-args' if sync.delete.in? [true, :watched]
+      run :partial, *args do |stdin, stdout, stderr|
         stdin.write paths.join "\n"
         stdin.close
       end
@@ -26,9 +30,9 @@ module LiveSync
 
     protected
 
-    def run type, args=nil
-      cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{sync.target} #{args}"
-      sync.excludes.each{ |e| cmd << "--exclude='#{e}'" }
+    def run type, *args
+      cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{sync.target} #{args.join ' '}"
+      sync.excludes.each{ |e| cmd << " --exclude='#{e}'" }
 
       sync.log.info "#{type}: starting with cmd: #{cmd}"
       stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
