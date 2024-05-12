@@ -11,10 +11,11 @@ module LiveSync
       @config = config
       @pids   = []
       @syncs  = Hash.new{ |h, k| h[k] = [] }
-      Process.setpgrp
     end
 
     def start
+      Process.setpgrp
+      Process.setproctitle 'livesync'
       instance_eval File.read(config), config
       run
       Process.waitall

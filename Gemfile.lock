@@ -1,3 +1,12 @@
+PATH
+  remote: .
+  specs:
+    ruby-livesync (1.0.0.pre.beta1)
+      activesupport
+      pry
+      rb-inotify
+      rufus-scheduler
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -28,7 +37,6 @@ GEM
     method_source (1.1.0)
     minitest (5.22.3)
     mutex_m (0.2.0)
-    net-ssh (7.2.3)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -45,11 +53,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  activesupport
-  net-ssh
-  pry
-  rb-inotify
-  rufus-scheduler
+  ruby-livesync!
 
 RUBY VERSION
    ruby 3.3.0p0

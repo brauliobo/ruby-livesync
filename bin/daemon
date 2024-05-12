@@ -1,9 +1,1 @@
-#!/usr/bin/env ruby
-
-require 'bundler/setup'
-
-require_relative '../lib/ruby-livesync'
-
-config = ARGV[0]
-LiveSync::Daemon.start config
-
+livesync

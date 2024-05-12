@@ -1,7 +1,5 @@
 require 'tempfile'
 require 'open3'
-require 'net/ssh'
-require 'net/ssh/proxy/command'
 
 module LiveSync
   class Ssh

@@ -2,6 +2,7 @@ module LiveSync
 
 end
 
+require_relative 'live_sync/version'
 require_relative 'live_sync/dsl'
 require_relative 'live_sync/log'
 require_relative 'live_sync/user'

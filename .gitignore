@@ -1,0 +1,4 @@
+*.gem
+*.zst
+pkg/*/pkg
+
