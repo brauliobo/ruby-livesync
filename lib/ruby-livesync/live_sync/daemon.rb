@@ -37,7 +37,7 @@ module LiveSync
             s.guard
           rescue => e
             msg  = e.message
-            msg += "\n#{e.backtrace.join "\n"}" if Log.debug
+            msg += "\n#{e.backtrace.join "\n"}" if Log.debug?
             Log.fatal msg
           end
           Process.waitall

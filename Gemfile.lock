@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-livesync (1.0.0.pre.beta1)
+    ruby-livesync (1.0.0.beta1)
       activesupport
       pry
       rb-inotify

@@ -1,7 +1,8 @@
 module LiveSync
   class Rsync
 
-    attr_reader :sync, :opts
+    attr_reader :sync
+    attr_accessor :opts
 
     def initialize sync
       @sync = sync
@@ -27,6 +28,8 @@ module LiveSync
 
     def run type, args=nil
       cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{sync.target} #{args}"
+      sync.excludes.each{ |e| cmd << "--exclude='#{e}'" }
+
       sync.log.info "#{type}: starting with cmd: #{cmd}"
       stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
       yield stdin, stdout, stderr if block_given?

@@ -8,15 +8,17 @@ module LiveSync
       delegate_missing_to :global
     end
 
-    class_attribute :debug
-    self.debug = !!ENV['DEBUG']
+    class_attribute :level
+    self.level = if !!ENV['DEBUG'] then :debug else :warning end
+
+    def self.debug?; level == :debug; end
 
     def initialize ctx=nil
       self.ctx = ctx
     end
 
     def debug msg
-      return unless debug
+      return unless Log.debug?
       puts "DEBUG: #{parse msg}"
     end
 

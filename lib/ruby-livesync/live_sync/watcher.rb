@@ -18,17 +18,19 @@ module LiveSync
       self
     end
 
-    def dir_rwatch path, *modes
+    def dir_rwatch path, *modes, excludes: [] 
       raise "#{path}: not a directory" unless File.directory? path
       modes = %i[create modify] if modes.blank?
 
-      tgts = [path] + Dir.glob("#{path}/**/*/")
+      excs = excludes.map{ |e| Regexp.new Regexp.quote e }
+      tgts = Dir.glob("#{path}/{.**,**}/")
       tgts.each do |t|
+        next Log.debug "watcher: skipping #{t}" if excs.any?{ |e| e.match t rescue nil }
         notifier.watch t, *modes do |event|
           yield event
         end
       rescue => e
-        Log.warning "#{t}: skipping due to #{e.class}: #{e.message}"
+        Log.warning "watcher: #{t}: skipping due to #{e.class}: #{e.message}"
       end
       self
     end

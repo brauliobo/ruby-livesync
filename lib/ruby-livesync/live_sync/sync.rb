@@ -14,6 +14,7 @@ module LiveSync
       fill_name name
       source name if File.exist? name
       @to_sync = Set.new
+      @rsync   = Rsync.new self
     end
 
     def fill_name name
@@ -37,10 +38,11 @@ module LiveSync
 
     dsl :delay, default: 5, type: Integer
 
+    dsl :excludes, default: []
+
     def run
       raise "#{ctx}: missing target" unless @target
       @ssh   = Ssh.connect @userhost
-      @rsync = Rsync.new self
     end
 
     def guard
@@ -49,7 +51,7 @@ module LiveSync
         @watcher   = Watcher.new
         @scheduler = Rufus::Scheduler.new
 
-        @watcher.dir_rwatch source, *%i[create modify], &method(:track)
+        @watcher.dir_rwatch source, *%i[create modify], excludes: excludes, &method(:track)
         @rsync.initial
         schedule
         sleep 1.day while true
