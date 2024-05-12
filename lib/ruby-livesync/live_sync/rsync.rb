@@ -16,7 +16,7 @@ module LiveSync
     def initial
       args  = []
       args << '--delete' if sync.delete.in? [true, :initial]
-      run :initial, *args
+      run :initial, *args, loglevel: :info
     end
 
     def partial paths
@@ -30,17 +30,17 @@ module LiveSync
 
     protected
 
-    def run type, *args
+    def run type, *args, loglevel: :debug
       cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{sync.target} #{args.join ' '}"
       sync.excludes.each{ |e| cmd << " --exclude='#{e}'" }
 
-      sync.log.info "#{type}: starting with cmd: #{cmd}"
+      sync.log.send loglevel, "#{type}: starting with cmd: #{cmd}"
       stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
       yield stdin, stdout, stderr if block_given?
       Thread.new do
         Process.wait @wait_thr.pid rescue Errno::ECHILD; nil
         @wait_thr = nil
-        sync.log.info "#{type}: finished"
+        sync.log.send loglevel, "#{type}: finished"
       end
     end
 

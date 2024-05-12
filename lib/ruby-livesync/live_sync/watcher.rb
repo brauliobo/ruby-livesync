@@ -12,7 +12,7 @@ module LiveSync
     end
 
     def watch path, *modes
-      Log.info "#{path}: watching for #{modes.join ','}"
+      Log.debug "#{path}: watching for #{modes.join ','}"
       modes  = %i[all_events] if modes.blank?
 
       notifier.watch path, *modes do |event|
@@ -26,10 +26,18 @@ module LiveSync
       modes  = %i[create modify] if modes.blank?
       modes << :delete if sync&.delete&.in? [true, :watched]
 
-      excs = sync&.excludes.map{ |e| Regexp.new Regexp.quote e } || []
-      tgts = [path] + Dir.glob("#{path}/{.**,**}/")
-      tgts.each do |t|
-        next Log.debug "watcher: skipping #{t}" if excs.any?{ |e| e.match t }
+      excs  = sync&.excludes.map{ |e| Regexp.new e } || []
+      tgts  = [path] + Dir.glob("#{path}/{.**,**}/")
+      rtgts = tgts.map{ |t| Pathname.new(t).relative_path_from(path).to_s }
+      excs.each do |e|
+        next unless mt = rtgts.find{ |rt| e.match rt }
+        Log.debug "watcher: skipping #{path}/#{mt} with subdirs"
+        rtgts.delete mt
+        rtgts.delete_if{ |rt| rt.start_with? mt } if File.directory? "#{path}/#{mt}"
+      end
+
+      rtgts.each do |rt|
+        t = "#{path}/#{rt}"
         notifier.watch t, *modes do |event|
           yield event
         end
