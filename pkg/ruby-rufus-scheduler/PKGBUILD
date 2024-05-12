@@ -1,0 +1,22 @@
+# Maintainer: Your Name <your.email@example.com>
+
+pkgname=ruby-rufus-scheduler
+pkgver=3.9.1
+pkgrel=1
+pkgdesc="Job scheduler for Ruby (at, in, cron and every jobs)"
+arch=('any')
+url="https://github.com/jmettraux/rufus-scheduler"
+license=('MIT')
+depends=('ruby')
+source=("https://rubygems.org/downloads/rufus-scheduler-${pkgver}.gem")
+noextract=("rufus-scheduler-${pkgver}.gem")
+sha256sums=('5fca077ca039a0025fa77fcc7484fa64e47a112124babc75d4c072ad05439992')
+
+package() {
+  cd "$srcdir"
+  local _gemdir="$(ruby -e'puts Gem.default_dir')"
+
+  gem install --ignore-dependencies --no-user-install -i "$pkgdir/$_gemdir" -n "$pkgdir/usr/bin" "rufus-scheduler-${pkgver}.gem"
+  rm "$pkgdir/$_gemdir/cache/rufus-scheduler-${pkgver}.gem"
+}
+
