@@ -27,7 +27,7 @@ module LiveSync
 
     dsl :user, default: :root
     dsl :source do |source|
-      raise "#{ctx}: source not found" unless File.exist? source
+      raise "#{ctx}: source isn't a directory" unless File.directory? source
       fill_name source
       @pathname = Pathname.new source
     end
@@ -58,7 +58,7 @@ module LiveSync
         @watcher   = Watcher.new self
         @scheduler = Rufus::Scheduler.new
 
-        @watcher.dir_rwatch source, &method(:track)
+        watch source
         @rsync.initial
         schedule
         sleep 1.day while true
@@ -66,7 +66,13 @@ module LiveSync
     end
 
     def track event
-      @to_sync << Pathname.new(event.absolute_name).relative_path_from(@pathname).to_s
+      path = event.absolute_name
+      watch path if File.directory?(path) and :create.in? event.flags
+      @to_sync << Pathname.new(path).relative_path_from(@pathname).to_s
+    end
+
+    def watch dir
+      @watcher.dir_rwatch dir, &method(:track)
     end
 
     def schedule
