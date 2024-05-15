@@ -6,6 +6,8 @@ module LiveSync
 
     attr_reader :sync
 
+    DEFAULT_MODES = %i[create modify]
+
     def initialize sync=nil
       @sync     = sync
       @notifier = INotify::Notifier.new
@@ -21,9 +23,9 @@ module LiveSync
       self
     end
 
-    def dir_rwatch path, *modes
+    def dir_rwatch path, *modes, **params
       raise "#{path}: not a directory" unless File.directory? path
-      modes  = %i[create modify] if modes.blank?
+      modes  = DEFAULT_MODES if modes.blank?
       modes << :delete if sync&.delete&.in? [true, :watched]
 
       excs  = sync&.excludes.map{ |e| Regexp.new e } || []
