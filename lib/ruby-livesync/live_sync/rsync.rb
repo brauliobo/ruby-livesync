@@ -1,12 +1,20 @@
 module LiveSync
-  class Rsync
+  class Rsync < Target
 
-    attr_reader :sync
-    attr_accessor :opts
+    dsl :opts, type: String
 
-    def initialize sync
-      @sync = sync
-      @opts = '-ax --partial'
+    attr_reader :ssh
+
+    def initialize *args, &block
+      super
+      # add trailing slash in case the dir is the same
+      sync.source File.join(sync.source, '') if File.basename(sync.source) == File.basename(@path)
+    end
+
+    def start
+      @ssh  = Ssh.connect userhost
+      sleep 1 and log.warning 'waiting for ssh' while !@ssh.available?
+      true
     end
 
     def running?
@@ -31,21 +39,21 @@ module LiveSync
     protected
 
     def run type, *args, loglevel: :debug
-      cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{sync.target} #{args.join ' '}"
+      cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{dest} #{args.join ' '}"
       sync.excludes.each{ |e| cmd << " --exclude='#{e}'" }
 
-      sync.log.send loglevel, "#{type}: starting with cmd: #{cmd}"
+      log.send loglevel, "#{type}: starting with cmd: #{cmd}"
       stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
       yield stdin, stdout, stderr if block_given?
       Thread.new do
         Process.wait @wait_thr.pid rescue Errno::ECHILD; nil
         @wait_thr = nil
-        sync.log.send loglevel, "#{type}: finished"
+        log.send loglevel, "#{type}: finished"
       end
     end
 
     def rsh
-      "ssh -o ControlPath=#{sync.ssh.cpath}"
+      "ssh -o ControlPath=#{ssh.cpath}"
     end
 
   end

@@ -8,10 +8,14 @@ sync '4tb' do
 
   delay = 5
 
-  source = '/mnt/4tb/'
-  target = 'root@bhavapower:/mnt/extensor/4tb'
+  # event list from inotify
+  # full list at https://manpages.ubuntu.com/manpages/latest/en/man1/inotifywait.1.html#events
+  modes = %i[create modify]
 
-  rsync.opts = '-ax --partial' # default
+  source = '/mnt/4tb/'
+  target rsync: 'root@bhavapower:/mnt/extensor/4tb' do
+    opts = '-ax --partial' # default
+  end
 
   # possible values are: true, false, :initial, :watched
   delete = true

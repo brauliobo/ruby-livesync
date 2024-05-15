@@ -10,16 +10,18 @@ module LiveSync
       class_attribute :attrs
       self.attrs = []
 
-      def self.dsl attr, default: nil, enum: nil, type: nil, &block
+      def self.dsl attr, default: nil, enum: nil,
+        type: nil, skip_set: false, &block
+
         self.attrs << attr
-        define_method attr do |sv=nil|
+        define_method attr do |sv=nil, &ablock|
           (v = instance_variable_get("@#{attr}"); return(if v.nil? then default else v end)) if sv.nil?
 
           raise "#{ctx}/#{attr}: incorrect type" if type and !sv.is_a? type
           raise "#{ctx}/#{attr}: value not one of following #{enum}" if enum and !sv.in? enum
 
-          instance_variable_set "@#{attr}", sv
-          instance_exec sv, &block if block
+          instance_variable_set "@#{attr}", sv unless skip_set
+          instance_exec sv, ablock, &block if block
         end
       end
 

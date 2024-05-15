@@ -7,14 +7,13 @@ module LiveSync
     attr_reader :scheduler
     attr_reader :log
     attr_reader :watcher
-    attr_reader :ssh
-    attr_reader :rsync
+    attr_reader :target
 
-    def initialize name = nil
+    def initialize name = nil, &block
       fill_name name
       source name if File.exist? name
+      dsl_apply(&block)
       @to_sync = Set.new
-      @rsync   = Rsync.new self
     end
 
     def fill_name name
@@ -32,13 +31,13 @@ module LiveSync
       @pathname = Pathname.new source
     end
 
-    dsl :target do |target|
-      @userhost, @target_path = target.split(':')
-      raise "#{ctx}: missing target path" unless @target_path
-      source File.join(@source, '') if File.basename(@source) == File.basename(@target_path)
+    dsl :target, skip_set: true do |opts, &block|
+      @target = Rsync.new self, opts[:rsync], &block if opts[:rsync]
     end
 
     dsl :delay, default: 5, type: Integer
+
+    dsl :modes, default: %i[create modify], type: []
 
     dsl :delete, default: false, enum: [true,false] + %i[initial watched]
 
@@ -47,9 +46,7 @@ module LiveSync
     def start
       return log.warning('skipping disabled sync') && false unless enabled
       raise "#{ctx}: missing target" unless @target
-      @ssh = Ssh.connect @userhost
-      sleep 1 and log.warning 'waiting for ssh' while !@ssh.available?
-      true
+      target.start
     end
 
     def guard
@@ -59,7 +56,7 @@ module LiveSync
         @scheduler = Rufus::Scheduler.new
 
         watch source
-        @rsync.initial
+        target.initial
         schedule
         sleep 1.day while true
       end
@@ -72,7 +69,7 @@ module LiveSync
     end
 
     def watch dir
-      @watcher.dir_rwatch dir, &method(:track)
+      @watcher.dir_rwatch dir, *modes, &method(:track)
     end
 
     def schedule
@@ -80,10 +77,10 @@ module LiveSync
     end
 
     def check
-      return if @rsync.running?
+      return if target.running?
       @watcher.process # calls #track
       return if @to_sync.blank?
-      @rsync.partial @to_sync
+      target.partial @to_sync
       @to_sync.clear
     ensure
       schedule

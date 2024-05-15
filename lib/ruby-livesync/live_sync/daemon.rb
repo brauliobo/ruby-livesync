@@ -22,8 +22,7 @@ module LiveSync
     end
 
     def sync name_or_path, &block
-      s = Sync.new name_or_path
-      s.dsl_apply(&block)
+      s = Sync.new name_or_path, &block
       @syncs[s.user] << s
     end
 
