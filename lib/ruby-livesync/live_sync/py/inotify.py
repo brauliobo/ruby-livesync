@@ -15,9 +15,6 @@ class EventHandler(pyinotify.ProcessEvent):
             event_desc = event.maskname
             self.events.add((event_desc, full_path))
 
-            if 'IN_CREATE' in event.maskname and os.path.isdir(full_path):
-                self.add_watch(full_path)
-
     def print_events(self):
         if self.events:
             for event_desc, full_path in self.events:
