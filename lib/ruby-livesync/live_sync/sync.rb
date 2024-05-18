@@ -4,7 +4,6 @@ module LiveSync
     include DSL
 
     attr_reader :name
-    attr_reader :scheduler
     attr_reader :log
     attr_reader :watcher
     attr_reader :target
@@ -13,7 +12,6 @@ module LiveSync
       fill_name name
       source name if File.exist? name
       dsl_apply(&block)
-      @to_sync = Set.new
     end
 
     def fill_name name
@@ -52,38 +50,21 @@ module LiveSync
     def guard
       fork do
         Process.setproctitle "livesync: sync #{ctx}"
-        @watcher   = Watcher.new self
-        @scheduler = Rufus::Scheduler.new
+        @watcher = RbWatcher.new self
 
         watch source
         target.initial
-        schedule
         sleep 1.day while true
       end
     end
 
-    def track event
-      path = event.absolute_name
-      watch path if File.directory?(path) and :create.in? event.flags
-      @to_sync << Pathname.new(path).relative_path_from(@pathname).to_s
-    end
-
     def watch dir
-      @watcher.dir_rwatch dir, *modes, &method(:track)
+      @watcher.watch dir, *modes, excludes: excludes, delay: delay, &method(:sync)
     end
 
-    def schedule
-      @scheduler.in "#{delay}s", &method(:check)
-    end
-
-    def check
+    def sync paths
       return if target.running?
-      @watcher.process # calls #track
-      return if @to_sync.blank?
-      target.partial @to_sync
-      @to_sync.clear
-    ensure
-      schedule
+      target.partial paths
     end
 
     protected

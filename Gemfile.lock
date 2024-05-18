@@ -5,7 +5,6 @@ PATH
       activesupport
       pry
       rb-inotify
-      rufus-scheduler
 
 GEM
   remote: https://rubygems.org/
@@ -26,12 +25,7 @@ GEM
     concurrent-ruby (1.2.3)
     connection_pool (2.4.1)
     drb (2.2.1)
-    et-orbi (1.2.11)
-      tzinfo
     ffi (1.16.3)
-    fugit (1.11.0)
-      et-orbi (~> 1, >= 1.2.11)
-      raabro (~> 1.4)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     method_source (1.1.0)
@@ -40,11 +34,8 @@ GEM
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    raabro (1.4.0)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    rufus-scheduler (3.9.1)
-      fugit (~> 1.1, >= 1.1.6)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
 
