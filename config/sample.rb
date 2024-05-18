@@ -3,6 +3,14 @@
 sync '4tb' do
   enabled = false
 
+  # watchers available:
+  # - :rb (default)
+  # - :py_inotify
+  # - :cmd (inotifywait)
+  # - :py_watchdog
+  #
+  watcher = :rb
+
   # fork to user below, usually associated with private keys 
   user = :root
 

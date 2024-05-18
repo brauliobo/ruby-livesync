@@ -22,6 +22,11 @@ module LiveSync
 
     dsl :enabled, default: true
 
+    dsl :watcher, skip_set: true, default: :rb do |name|
+      klass = :"#{name.to_s.camelize}Watcher"
+      @watcher_class = LiveSync.const_get klass
+    end
+
     dsl :user, default: :root
     dsl :source do |source|
       raise "#{ctx}: source isn't a directory" unless File.directory? source
@@ -35,7 +40,7 @@ module LiveSync
 
     dsl :delay, default: 5, type: Integer
 
-    dsl :modes, default: %i[create modify], type: []
+    dsl :modes, default: %i[create modify], type: Array
 
     dsl :delete, default: false, enum: [true,false] + %i[initial watched]
 
@@ -50,7 +55,7 @@ module LiveSync
     def guard
       fork do
         Process.setproctitle "livesync: sync #{ctx}"
-        @watcher = RbWatcher.new self
+        @watcher = @watcher_class.new self
 
         watch source
         target.initial
