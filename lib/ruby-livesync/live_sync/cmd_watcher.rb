@@ -1,5 +1,3 @@
-Thread.report_on_exception = true
-
 module LiveSync
   class CmdWatcher < Watcher
 
@@ -31,6 +29,9 @@ module LiveSync
           file,events = parse line
           yield [OpenStruct.new(absolute_name: file, flags: events)]
         end
+      end
+      Thread.new do
+        STDERR.puts stderr.read
       end
     end
 
