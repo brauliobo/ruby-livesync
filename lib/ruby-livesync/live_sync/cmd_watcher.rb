@@ -25,13 +25,13 @@ module LiveSync
 
       Thread.new do
         stdout.sync = true
-        lines = stdout.each_line.each do |line|
+        stdout.each_line.each do |line|
           file,events = parse line
           yield [OpenStruct.new(absolute_name: file, flags: events)]
         end
       end
       Thread.new do
-        STDERR.puts stderr.read
+        stderr.each_line.each{ |line| STDERR.puts line }
       end
     end
 
