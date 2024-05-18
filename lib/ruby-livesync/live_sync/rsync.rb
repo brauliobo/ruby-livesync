@@ -1,7 +1,7 @@
 module LiveSync
   class Rsync < Target
 
-    dsl :opts, type: String
+    dsl :opts, default: '-ax --partial', type: String
 
     attr_reader :ssh
 
