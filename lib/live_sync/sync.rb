@@ -35,7 +35,7 @@ module LiveSync
     end
 
     dsl :target, skip_set: true do |opts, &block|
-      @target = Rsync.new self, opts[:rsync], &block if opts[:rsync]
+      @target = Rsync.new self, source, opts[:rsync], &block if opts[:rsync]
     end
 
     dsl :delay, default: 5, type: Integer

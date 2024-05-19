@@ -3,12 +3,18 @@ module LiveSync
 
     dsl :opts, default: '-ax --partial', type: String
 
-    attr_reader :ssh
+    dsl :reverse_sync do |&block|
+      opts << ' -u'
+      @reverse_sync = ReverseRsync.new self, &block
+    end
+
+    attr_reader :ssh, :rprefix
 
     def initialize *args, &block
       super
       # add trailing slash in case the dir is the same
       sync.source File.join(sync.source, '') if File.basename(sync.source) == File.basename(@path)
+      @rprefix = ' reverse:' if reverse
     end
 
     def start
@@ -18,13 +24,15 @@ module LiveSync
     end
 
     def running?
-      @wait_thr
+      @wait_thr or reverse_sync&.running?
     end
 
     def initial
       args  = []
       args << '--delete' if sync.delete.in? [true, :initial]
       run :initial, *args, loglevel: :info
+
+      reverse_sync.initial if reverse_sync
     end
 
     def partial paths
@@ -42,13 +50,13 @@ module LiveSync
       cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{dest} #{args.join ' '}"
       sync.excludes.each{ |e| cmd << " --exclude='#{e}'" }
 
-      log.send loglevel, "#{type}: starting with cmd: #{cmd}"
+      log.send loglevel, "#{type}:#{rprefix} starting with cmd: #{cmd}"
       stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
       yield stdin, stdout, stderr if block_given?
       Thread.new do
         Process.wait @wait_thr.pid rescue Errno::ECHILD; nil
         @wait_thr = nil
-        log.send loglevel, "#{type}: finished"
+        log.send loglevel, "#{type}:#{rprefix} finished"
       end
     end
 

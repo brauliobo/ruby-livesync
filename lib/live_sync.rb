@@ -15,5 +15,6 @@ require_relative 'live_sync/cmd_watcher'
 require_relative 'live_sync/py_inotify_watcher'
 require_relative 'live_sync/py_watchdog_watcher'
 require_relative 'live_sync/sync'
+require_relative 'live_sync/reverse_rsync'
 require_relative 'live_sync/daemon'
 

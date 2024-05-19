@@ -4,6 +4,8 @@ module LiveSync
     class_attribute :base_cmd
     self.base_cmd = 'bash -s'
 
+    class_attribute :rsh
+
     class_attribute :script
     self.script = <<-HEREDOC
       tp=$(mktemp -u)

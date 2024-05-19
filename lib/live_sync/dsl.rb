@@ -15,7 +15,7 @@ module LiveSync
         self.attrs << attr
 
         define_method attr do |sv=nil, opts={}, &ablock|
-          sv = default if opts[:init]
+          sv = default if opts[:init] and default
           (v = instance_variable_get("@#{attr}"); return(if v.nil? then default else v end)) if sv.nil?
 
           raise "#{ctx}/#{attr}: incorrect type of #{sv.inspect}" if type and !sv.is_a? type
