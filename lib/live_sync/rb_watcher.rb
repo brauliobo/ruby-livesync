@@ -6,7 +6,7 @@ module LiveSync
       modes  = DEFAULT_MODES if modes.blank?
       modes << :delete if sync&.delete&.in? [true, :watched]
 
-      tracker = Tracker.new path, delay, &block
+      tracker = Tracker.new self, path, delay, &block
       rtgts = glob path, recursive: recursive, excludes: excludes
       track(path, rtgts, *modes,
         delay:     1,
@@ -23,12 +23,13 @@ module LiveSync
     protected
 
     class Tracker
-      def initialize path, delay, &block
+      def initialize watcher, path, delay, &block
+        @watcher  = watcher
+        @pathname = Pathname.new path
         @delay    = delay
         @block    = block
         @to_sync  = Set.new
         @notifier = INotify::Notifier.new
-        @pathname = Pathname.new path
       end
 
       def watch *args, &block
@@ -41,7 +42,7 @@ module LiveSync
 
       def check
         @notifier.process # calls track
-        @block.call @to_sync
+        @watcher.notify @to_sync, &@block
         @to_sync.clear
       ensure
         timeout_check

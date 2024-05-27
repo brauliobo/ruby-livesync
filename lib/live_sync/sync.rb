@@ -5,12 +5,10 @@ module LiveSync
 
     attr_reader :name
     attr_reader :log
-    attr_reader :watcher
-    attr_reader :target
 
     def initialize name = nil, &block
       fill_name name
-      source name if File.exist? name
+      source name if File.directory? name
       dsl_apply(&block)
     end
 
@@ -22,20 +20,23 @@ module LiveSync
 
     dsl :enabled, default: true
 
-    dsl :watcher, skip_set: true, default: :rb do |name|
+    dsl :watcher, default: :rb do |name|
       klass = :"#{name.to_s.camelize}Watcher"
-      @watcher_class = LiveSync.const_get klass
+      klass = LiveSync.const_get klass
+      klass.new self
     end
 
     dsl :user, default: :root
     dsl :source do |source|
       raise "#{ctx}: source isn't a directory" unless File.directory? source
-      fill_name source
-      @pathname = Pathname.new source
+      fill_name source if !name
+      source
     end
 
-    dsl :target, skip_set: true do |opts, &block|
-      @target = Rsync.new self, source, opts[:rsync], &block if opts[:rsync]
+    attr_reader :dest
+    dsl :target do |opts, block|
+      @dest = opts[:rsync]
+      Rsync.new self, source, @dest, &block
     end
 
     dsl :delay, default: 5, type: Integer
@@ -55,21 +56,10 @@ module LiveSync
     def guard
       fork do
         Process.setproctitle "livesync: sync #{ctx}"
-        @watcher = @watcher_class.new self
-
-        watch source
+        target.watch
         target.initial
         sleep 1.day while true
       end
-    end
-
-    def watch dir
-      @watcher.watch dir, *modes, excludes: excludes, delay: delay, &method(:sync)
-    end
-
-    def sync paths
-      return if target.running?
-      target.partial paths
     end
 
     protected

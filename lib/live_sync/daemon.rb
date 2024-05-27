@@ -1,6 +1,9 @@
 module LiveSync
   class Daemon
 
+    class_attribute :dry
+    self.dry = !!ENV['DRY']
+
     def self.start config
       new(config).start
     end
@@ -9,6 +12,7 @@ module LiveSync
 
     def initialize config
       @config = config
+      $config = config
       @pids   = []
       @syncs  = Hash.new{ |h, k| h[k] = [] }
     end

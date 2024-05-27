@@ -3,18 +3,17 @@ module LiveSync
 
     dsl :opts, default: '-ax --partial', type: String
 
-    dsl :reverse_sync do |&block|
-      opts << ' -u'
-      @reverse_sync = ReverseRsync.new self, &block
+    dsl :reverse_sync do |v, block|
+      ReverseRsync.new self, &block
     end
 
     attr_reader :ssh, :rprefix
 
-    def initialize *args, &block
-      super
-      # add trailing slash in case the dir is the same
-      sync.source File.join(sync.source, '') if File.basename(sync.source) == File.basename(@path)
-      @rprefix = ' reverse:' if reverse
+    def initialize *args, **params, &block
+      super *args, **params, &block
+      # add trailing slash in case the dir name is the same
+      @source  = File.join source, '' if File.basename(source) == File.basename(dest)
+      @rprefix = 'reverse: ' if reverse
     end
 
     def start
@@ -24,7 +23,7 @@ module LiveSync
     end
 
     def running?
-      @wait_thr or reverse_sync&.running?
+      @wait_thr
     end
 
     def initial
@@ -32,7 +31,7 @@ module LiveSync
       args << '--delete' if sync.delete.in? [true, :initial]
       run :initial, *args, loglevel: :info
 
-      reverse_sync.initial if reverse_sync
+      @reverse_sync&.initial
     end
 
     def partial paths
@@ -47,21 +46,24 @@ module LiveSync
     protected
 
     def run type, *args, loglevel: :debug
-      cmd = "rsync -e '#{rsh}' #{opts} #{sync.source} #{dest} #{args.join ' '}"
+      cmd = "rsync -e '#{rsh}' #{opts} #{source} #{dest} #{args.join ' '}"
       sync.excludes.each{ |e| cmd << " --exclude='#{e}'" }
 
-      log.send loglevel, "#{type}:#{rprefix} starting with cmd: #{cmd}"
+      log.send loglevel, "#{rprefix}#{type}: starting with cmd: #{cmd}"
+      return binding.pry if Daemon.dry
       stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
       yield stdin, stdout, stderr if block_given?
+
       Thread.new do
         Process.wait @wait_thr.pid rescue Errno::ECHILD; nil
         @wait_thr = nil
-        log.send loglevel, "#{type}:#{rprefix} finished"
+        log.send loglevel, "#{rprefix}#{type}: finished"
       end
     end
 
     def rsh
-      "ssh -o ControlPath=#{ssh.cpath}"
+      # -t -t ensure the running process is killed with the client
+      "ssh -o ControlPath=#{ssh.cpath} -t -t"
     end
 
   end

@@ -47,6 +47,11 @@ recursive   = %{recursive}
 event_mask  = pyinotify.IN_CREATE | pyinotify.IN_MODIFY | pyinotify.IN_MOVED_TO | pyinotify.IN_DELETE  # Event mask
 base_device = os.stat('%{path}').st_dev
 
+try:
+    import setproctitle
+    setproctitle.setproctitle('livesync/py_inotify: %{path}')
+except ImportError: pass
+
 wm = pyinotify.WatchManager()
 handler = EventHandler(excludes=excludes, recursive=recursive, mask=event_mask, base_device=base_device)
 notifier = pyinotify.Notifier(wm, handler)

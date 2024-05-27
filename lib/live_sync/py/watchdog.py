@@ -41,6 +41,11 @@ observer = Observer()
 event_handler = MyEventHandler(observer, excludes)
 event_handler.schedule_directory(path)
 
+try:
+    import setproctitle
+    setproctitle.setproctitle('livesync/py_watchdog: %{path}')
+except ImportError: pass
+
 observer.start()
 try:
     while True:
