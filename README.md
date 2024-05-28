@@ -25,6 +25,54 @@ Long-term, ongoing support and development by the community will be crucial for 
 Contributions to the codebase are highly welcome, whether they be new features, bug fixes, or improvements.
 The code is intentionally designed to be straightforward and flexible, ideal for developers looking to add new synchronization options or enhancements.
 
+### Configuration
+After installation, you'll need to configure ruby-livesync for use. Configuration file should be placed in `/etc/livesync/`.
+
+Start by copying the sample configuration file at [config/sample.rb](config/sample.rb) to `/etc/livesync/config.rb`.
+
+Below is a commented sample config file
+```ruby
+# name of the sync
+# if it is an existing path then `source` is set this value
+sync '4tb' do
+  enabled = false
+
+  # watchers available:
+  # - :rb (default)
+  # - :py_inotify
+  # - :cmd (inotifywait)
+  # - :py_watchdog
+  #
+  watcher = :rb
+
+  # fork to user below, usually associated with private keys 
+  user = :root
+
+  delay = 5
+
+  # event list from inotify
+  # full list at https://manpages.ubuntu.com/manpages/latest/en/man1/inotifywait.1.html#events
+  modes = %i[create modify]
+
+  source = '/mnt/4tb/'
+  target rsync: 'user@remote:/mnt/4tb' do
+    opts = '-ax --partial' # default
+
+    # enables bidirectional sync, using rsync's --update and a pyinotify based watcher
+    reverse_sync
+  end
+
+  # possible values are: true, false, :initial, :watched
+  delete = true
+
+  excludes = [
+    '.snapshots',
+  ]
+
+  log.info 'starting'
+end
+```
+
 ## Installation and Usage
 
 ruby-livesync is available for installation either as a RubyGem or as an Arch Linux package from the AUR. Follow the steps below for your preferred installation method.
@@ -41,10 +89,6 @@ For Arch Linux users, ruby-livesync is available as an AUR package. You can inst
 ```
 yay -S ruby-livesync
 ```
-
-### Configuration
-After installation, you'll need to configure ruby-livesync for use. Configuration file should be placed in `/etc/livesync/`.
-Start by copying the sample configuration file at [config/sample.rb](config/sample.rb) to `/etc/livesync/config.rb`.
 
 ### System Service Setup
 ruby-livesync can be run as a system service using systemd. A [standard unit file](livesync.service) is provided within the AUR package

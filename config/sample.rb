@@ -21,8 +21,11 @@ sync '4tb' do
   modes = %i[create modify]
 
   source = '/mnt/4tb/'
-  target rsync: 'root@bhavapower:/mnt/extensor/4tb' do
+  target rsync: 'user@remote:/mnt/4tb' do
     opts = '-ax --partial' # default
+
+    # enables bidirectional sync, using rsync's --update and a pyinotify based watcher
+    reverse_sync
   end
 
   # possible values are: true, false, :initial, :watched
