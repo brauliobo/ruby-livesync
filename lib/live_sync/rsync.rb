@@ -63,7 +63,7 @@ module LiveSync
 
     def rsh
       # -t -t ensure the running process is killed with the client
-      "ssh -o ControlPath=#{ssh.cpath} -t -t"
+      "ssh -o ControlPath=#{ssh.cpath}"
     end
 
   end
