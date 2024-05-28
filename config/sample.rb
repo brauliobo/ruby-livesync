@@ -14,11 +14,12 @@ sync '4tb' do
   # fork to user below, usually associated with private keys 
   user = :root
 
+  # interval to collect all watched events and run rsync
   delay = 5
 
   # event list from inotify
-  # full list at https://manpages.ubuntu.com/manpages/latest/en/man1/inotifywait.1.html#events
-  modes = %i[create modify]
+  # full list at https://man.archlinux.org/man/inotifywait.1#EVENTS
+  modes = %i[create modify delete]
 
   source = '/mnt/4tb/'
   target rsync: 'user@remote:/mnt/4tb' do
