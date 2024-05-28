@@ -37,7 +37,7 @@ module LiveSync
         end
       end
       Thread.new do
-        stderr.each_line.each{ |line| STDERR.puts line }
+        stderr.each_line.each{ |line| log&.error line }
       end
     end
 

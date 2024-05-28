@@ -31,7 +31,9 @@ module LiveSync
       watcher.watch watchpath, *modes, excludes: excludes, delay: delay, &method(:on_notify)
     end
 
-    def on_notify paths
+    def on_notify events
+      wpath = Pathname.new watchpath
+      paths = events.map{ |e| Pathname.new(e.absolute_name).relative_path_from(wpath).to_s }
       @to_sync.merge paths
       return if running?
       partial @to_sync

@@ -25,7 +25,6 @@ module LiveSync
     class Tracker
       def initialize watcher, path, delay, &block
         @watcher  = watcher
-        @pathname = Pathname.new path
         @delay    = delay
         @block    = block
         @to_sync  = Set.new
