@@ -26,7 +26,7 @@ module LiveSync
     end
 
     def initial
-      watcher.base_cmd = "#{rsh} #{userhost} #{watcher.base_cmd}"
+      watcher.base_cmd = "#{rsh} #{userhost} setsid #{watcher.base_cmd}"
       watch
       sleep 1 while parent.running?
       super

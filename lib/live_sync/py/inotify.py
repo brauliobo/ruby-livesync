@@ -48,10 +48,10 @@ recursive   = %{recursive}
 event_mask  = pyinotify.IN_CREATE | pyinotify.IN_MODIFY | pyinotify.IN_DELETE
 base_device = os.stat(path).st_dev
 
-watch_path(path, excludes, recursive, event_mask, base_device)
-
 try:
     import setproctitle
-    setproctitle.setproctitle('livesync/py_inotify: ', path)
+    setproctitle.setproctitle(f'livesync/py_inotify: {path}')
 except ImportError: pass
+
+watch_path(path, excludes, recursive, event_mask, base_device)
 

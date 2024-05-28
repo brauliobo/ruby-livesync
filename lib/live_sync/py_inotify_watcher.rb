@@ -1,7 +1,7 @@
 module LiveSync
   class PyInotifyWatcher < CmdWatcher
 
-    self.base_cmd = 'python -'
+    self.base_cmd = 'python'
 
     self.script = File.read "#{File.dirname __FILE__}/py/inotify.py"
 
