@@ -15,10 +15,10 @@ def watch_path(path, excludes, recursive, mask, base_device):
     notifier = pyinotify.Notifier(wm, handler)
     
     def add_watch(path):
-        if not any(exclude in path for exclude in excludes):
+        if os.path.isdir(path) and not any(exclude in path for exclude in excludes):
             try:
                 if os.stat(path).st_dev == base_device:
-                    wm.add_watch(path, mask, auto_add=recursive, rec=recursive)
+                    wm.add_watch(path, mask, auto_add=recursive)
                 else:
                     print(f"Skipping {path} (different device)", file=sys.stderr)
             except Exception as e:
