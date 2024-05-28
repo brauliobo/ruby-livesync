@@ -9,6 +9,7 @@ This led to the creation of `ruby-livesync`, a more efficient solution designed 
 
 - **Multi-User Support**: Efficiently manages multiple synchronization processes under a forked process for each specified user.
 - **Persistent SSH Connections**: Reduces overhead by reusing a SSH connection for multiple rsync calls to the same destination.
+- **Bidirectional Sync**: Reverse Sync supported via pyinotify remotehost and rsync's --update. Still in beta, use with caution and report issues
 - **Optimized Resource Usage**: Achieves near-zero CPU usage by processing inotify events at specified intervals and minimal memory usage by monitoring directories only.
 - **Streamlined Logging**: Outputs only pertinent information directly through systemd, eliminating the need for managing custom log files.
 - **Flexible Configuration**: Configuration files are written in Ruby, offering enhanced flexibility and ease of customization.
