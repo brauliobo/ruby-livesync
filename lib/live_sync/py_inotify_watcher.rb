@@ -1,7 +1,7 @@
 module LiveSync
   class PyInotifyWatcher < CmdWatcher
 
-    self.base_cmd = 'python'
+    self.base_cmd = 'python -'
 
     self.script = File.read "#{File.dirname __FILE__}/py/inotify.py"
 
@@ -13,6 +13,10 @@ module LiveSync
         delay:     delay,
         excludes:  excludes.map{ |e| "'#{e}'" }.join(','),
       }
+    end
+
+    def flag_map e
+      e.to_s.gsub(/^in_/, '').to_sym
     end
 
   end

@@ -37,7 +37,7 @@ module LiveSync
       end
 
       def track event
-        @to_sync << Pathname.new(event.absolute_name).relative_path_from(@pathname).to_s
+        @to_sync << OpenStruct.new(absolute_name: event.absolute_name, flags: event.flags)
       end
 
       def check

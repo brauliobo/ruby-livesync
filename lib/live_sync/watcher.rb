@@ -4,7 +4,7 @@ module LiveSync
     DEFAULT_MODES = %i[create modify]
 
     attr_reader :sync
-    delegate :log, to: :sync
+    delegate :log, to: :sync, allow_nil: true
 
     def initialize sync=nil
       @sync = sync
@@ -14,12 +14,17 @@ module LiveSync
     end
 
     def notify events, &block
-      log.debug "NOTIFY: #{events.inspect}"
+      log&.debug "NOTIFY: #{events.inspect}"
+      events.each{ |e| e.flags = e.flags.map{ |f| flag_map f } }
       block.call Set.new events
     end
 
     def watching?
       false
+    end
+
+    def flag_map e
+      e
     end
 
   end

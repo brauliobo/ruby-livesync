@@ -3,13 +3,13 @@
 require_relative '../lib/ruby-livesync'
 
 path  = ARGV[0]
-meth  = ENV['METH']&.to_sym || :watch
 modes = ENV['MODES']&.split(',')&.map(&:to_sym)
 klass = ENV['WATCHER'] || 'Rb'
 klass = LiveSync.const_get :"#{klass}Watcher"
 delay = ENV['DELAY']&.to_i || 5
 opts  = {recursive: true, delay: delay,}
-klass.new.send meth, path, *modes do |events|
+klass.base_cmd = "#{ENV['BASE_CMD']} #{klass.base_cmd}" if ENV['BASE_CMD']
+klass.new.watch path, *modes do |events|
   events.each do |e|
     puts "#{e.absolute_name}: #{e.flags}"
   end

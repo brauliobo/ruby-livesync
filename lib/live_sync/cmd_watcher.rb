@@ -18,20 +18,22 @@ module LiveSync
       done
     HEREDOC
 
-    def watch path, *modes, **params, &block
+    def watch path, *modes, delay: 1, **params, &block
       modes  = DEFAULT_MODES if modes.blank?
       script = self.script % parsed_params(path, *modes, **params)
-      log.debug "#{self.class.name}: running #{base_cmd}"
+      log&.debug "#{self.class.name}: running #{base_cmd}"
       stdin, stdout, stderr, @wait_thr = Open3.popen3 base_cmd
       stdin.write script
       stdin.close
 
       Thread.new do
         loop do
-          events = stdout.each_line.map{ |l| parse l } while stdout.wait_readable(0.5)
-          log.debug events.inspect
-          notify events, &block if events.present?
-          break if @wait_thr.join(0.5)
+          events = []
+          Timeout.timeout(delay){ stdout.each_line.each{ |l| events << l } } # accummulator
+          break if @wait_thr.join(0.1)
+        rescue Timeout::Error
+        ensure
+          notify events.map{ |l| parse l }, &block if events.present?
         end
       end
       Thread.new do
