@@ -39,7 +39,6 @@ module LiveSync
       args << '--delete-missing-args' if sync.delete.in? [true, :watched]
       run :partial, *args do |stdin, stdout, stderr|
         stdin.write paths.join "\n"
-        stdin.close
       end
     end
 
@@ -50,9 +49,11 @@ module LiveSync
       sync.excludes.each{ |e| cmd << " --exclude='#{e}'" }
 
       log.send loglevel, "#{rprefix}#{type}: starting with cmd: #{cmd}"
-      return binding.pry if Daemon.dry
+      return if Daemon.dry
+
       stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
       yield stdin, stdout, stderr if block_given?
+      stdin.close; stdout.close; stderr.close
 
       Thread.new do
         Process.wait @wait_thr.pid rescue Errno::ECHILD; nil

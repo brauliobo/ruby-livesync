@@ -28,6 +28,7 @@ module LiveSync
           stdin, stdout, stderr, @wait_thr = Open3.popen3 cmd
           Process.wait @wait_thr.pid
           Log.error "ssh/#{userhost}: #{stderr.read}"
+          stdin.close; stdout.close; stderr.close
         end
       end
     end

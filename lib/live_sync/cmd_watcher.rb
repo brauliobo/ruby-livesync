@@ -35,9 +35,11 @@ module LiveSync
         ensure
           notify events.map{ |l| parse l }, &block if events.present?
         end
+        stdout.close
       end
       Thread.new do
         stderr.each_line.each{ |line| log&.error line }
+        stderr.close
       end
     end
 
