@@ -62,7 +62,7 @@ module LiveSync
           track et, glob(et, **opts), *modes, tracker: tracker, **opts
         end
       rescue => e
-        Log.warning "watcher: #{t}: skipping due to #{e.class}: #{e.message}"
+        log&.warning "watcher: #{t}: skipping due to #{e.class}: #{e.message}"
       end
     end
 
@@ -77,7 +77,7 @@ module LiveSync
       excs  = excludes.map{ |e| Regexp.new e } || []
       excs.each do |e|
         next unless mt = rtgts.find{ |rt| e.match rt }
-        Log.debug "watcher: skipping #{path}/#{mt} with subdirs"
+        log&.debug "watcher: skipping #{path}/#{mt} with subdirs"
         rtgts.delete mt
         rtgts.delete_if{ |rt| rt.start_with? mt } if File.directory? "#{path}/#{mt}"
       end
