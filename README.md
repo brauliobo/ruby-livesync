@@ -74,6 +74,27 @@ sync '4tb' do
 end
 ```
 
+## Recommended System settings
+To avoid reaching limits, it is recommended to configure the max number of files and watched files, see examples below:
+
+```
+$ cat /etc/sysctl.d/fs.conf  
+ fs.file-max=100100100
+$ cat /etc/sysctl.d/inotify.conf 
+fs.inotify.max_user_watches  = 100100100
+fs.inotify.max_queued_events = 100100100
+```
+Apply settings with:
+```
+sudo sysctl -p /etc/sysctl.d/fs.conf
+sudo sysctl -p /etc/sysctl.d/inotify.conf
+```
+
+For systemd's config at `/etc/systemd/system.conf`
+```
+DefaultLimitNOFILE=100100:100100100
+```
+
 ## Installation and Usage
 
 ruby-livesync is available for installation either as a RubyGem or as an Arch Linux package from the AUR. Follow the steps below for your preferred installation method.
