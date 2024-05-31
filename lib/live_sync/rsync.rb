@@ -4,6 +4,7 @@ module LiveSync
     dsl :opts, default: '-ax --partial', type: String
 
     dsl :reverse_sync do |v, block|
+      return if self.class.is_a? ReverseRsync # protect reverse infinite loop
       ReverseRsync.new self, &block
     end
 
