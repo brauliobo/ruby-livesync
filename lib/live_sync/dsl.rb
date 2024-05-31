@@ -15,11 +15,12 @@ module LiveSync
 
         define_method attr do |sv=nil, &ablock|
           v   = instance_variable_get "@#{attr}"
+          return v if v and sv.nil? # getter
+
           v ||= if block
             then instance_exec sv || default.dup, ablock, &block
             else sv || default.dup end
           instance_variable_set "@#{attr}", v if v
-          return v if sv.nil? # getter
 
           # setter validation
           raise "#{ctx}/#{attr}: incorrect type of #{v.inspect}" if type and !v.is_a? type
